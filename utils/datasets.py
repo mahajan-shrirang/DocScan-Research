@@ -24,13 +24,16 @@ def splitter(image_dir, label_dir, output_dir, split_ratio=0.8, seed=42):
     val_images = images[split_index:]
     
     for img in train_images:
-        shutil.move(os.path.join(image_dir, img), os.path.join(train_image_dir, img))
+        shutil.copy2(os.path.join(image_dir, img), os.path.join(train_image_dir, img))
 
-        label = img.replace('.png', '.txt')
-        shutil.move(os.path.join(label_dir, label), os.path.join(train_label_dir, label))
+        label = img.replace('.png', '.xml')
+        shutil.copy2(os.path.join(label_dir, label), os.path.join(train_label_dir, label))
     
     for img in val_images:
-        shutil.move(os.path.join(image_dir, img), os.path.join(val_image_dir, img))
+        shutil.copy2(os.path.join(image_dir, img), os.path.join(val_image_dir, img))
 
-        label = img.replace('.png', '.txt')
-        shutil.move(os.path.join(label_dir, label), os.path.join(val_label_dir, label))
+        label = img.replace('.png', '.xml')
+        shutil.copy2(os.path.join(label_dir, label), os.path.join(val_label_dir, label))
+
+if __name__ == '__main__':
+    splitter('D:/Files/Projects/Engineering Drawing Object Detection/DocScan-Research/data/combined-voc/images/', 'D:/Files/Projects/Engineering Drawing Object Detection/DocScan-Research/data/combined-voc/labels/', 'D:/Files/Projects/Engineering Drawing Object Detection/DocScan-Research/data/combined-voc/split/', split_ratio=0.8, seed=42)
