@@ -5,6 +5,7 @@ import io
 from PIL import Image
 import numpy as np
 
+from core.model import inference_image
 from utils.preprocess import preprocess_pdf
 from utils.merge import merge_images_and_save_pdf
 
@@ -23,13 +24,11 @@ if file:
     submit = st.button("Detect Objects")
     final_results = []
     if submit:
-        yolo = YOLO("runs\\train\\expv8\\weights\\best.pt")
         for pixmap in images:
             byte_code = pixmap.tobytes()
             image:Image = Image.open(io.BytesIO(byte_code))
             image = np.array(image)
-            results = yolo.predict(image)
-            output_image = results[0].plot()
+            output_image = inference_image(image)
             final_results.append(output_image)
 
         st.image(final_results[0], caption="Detected Objects", use_column_width=True)
