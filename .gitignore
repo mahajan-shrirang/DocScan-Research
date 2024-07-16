@@ -167,3 +167,6 @@ input
 output
 *.pt
 runs/
+lightning_logs/
+model.safetensors
+detrconfig.json
