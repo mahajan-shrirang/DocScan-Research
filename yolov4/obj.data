@@ -1,0 +1,5 @@
+classes = 4
+train = /content/YOLOV4_Custom/train.txt
+valid = /content/YOLOV4_Custom/valid.txt
+names = /content/YOLOV4_Custom/custom.names
+backup = /content/YOLOV4_Custom/backup

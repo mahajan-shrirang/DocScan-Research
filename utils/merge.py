@@ -1,6 +1,9 @@
 import os
 import json
 import shutil
+import numpy as np
+import PyPDF2
+from PIL import Image
 
 def find_paths(file_name, base_paths):
     file_paths = []
@@ -59,3 +62,6 @@ def copy_images(base_paths, output_images_folder):
             dst_image_path = os.path.join(output_images_folder, image_filename)
             shutil.copy(src_image_path, dst_image_path)
 
+def merge_images_and_save_pdf(images: list[np.ndarray]):
+    images = [Image.fromarray(image) for image in images]
+    return images[0].save("output.pdf", "PDF", save_all=True, append_images=images[1:], resolution=100.0)
