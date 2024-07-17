@@ -4,7 +4,7 @@ import fitz
 import os
 
 def main():
-    input_pdf = fitz.open("D:\Data Science\DocScan-Research\input\Object_detection_180-1-91.pdf")
+    input_pdf = fitz.open("D:\Data Science\DocScan-Research\input\Object_detection_input.pdf")
     output_folder = r'D:\Data Science\DocScan-Research\output'
     
     if not os.path.exists(output_folder):
@@ -22,7 +22,7 @@ def main():
     ]
 
     result_json_paths = find_paths("result.json", base_paths)
-    output_path = r"D:\Data Science\DocScan-Research\output\annotated\result.json"
+    output_path = r"D:\Data Science\DocScan-Research\output\annotated\images\result.json"
     if not os.path.exists(os.path.dirname(output_path)):
         os.makedirs(os.path.dirname(output_path))
     output_images_folder = r"D:\Data Science\DocScan-Research\output\annotated\images"
