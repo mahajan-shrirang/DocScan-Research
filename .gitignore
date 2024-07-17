@@ -169,4 +169,4 @@ output
 runs/
 lightning_logs/
 model.safetensors
-detrconfig.json
+config.json
