@@ -170,3 +170,5 @@ runs/
 lightning_logs/
 model.safetensors
 config.json
+Extracted Images
+Inference
