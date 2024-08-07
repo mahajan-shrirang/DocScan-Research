@@ -172,3 +172,4 @@ model.safetensors
 config.json
 Extracted Images
 Inference
+models/
