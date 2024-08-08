@@ -14,8 +14,6 @@ def extract_images_from_pdf_file_object(doc, start_page_number):
     pix = page.get_pixmap()
     return pix
 
-    
-
 def preprocess_pdf(file):
     input_pdf = fitz.open(stream=file, filetype="pdf")
         
