@@ -32,7 +32,7 @@ if file:
             final_results.append(output_image)
 
         st.image(final_results[0], caption="Detected Objects", use_column_width=True)
-        merge_images_and_save_pdf(final_results)
+        merge_images_and_save_pdf(final_results, "output.pdf")
         output_file = io.open("output.pdf", "rb")
         st.download_button("Download PDF", output_file, "output.pdf")
         st.success("PDF file created with detected objects")

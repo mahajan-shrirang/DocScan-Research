@@ -62,6 +62,6 @@ def copy_images(base_paths, output_images_folder):
             dst_image_path = os.path.join(output_images_folder, image_filename)
             shutil.copy(src_image_path, dst_image_path)
 
-def merge_images_and_save_pdf(images: list[np.ndarray]):
+def merge_images_and_save_pdf(images: list[np.ndarray], save_path: str):
     images = [Image.fromarray(image) for image in images]
-    return images[0].save("output.pdf", "PDF", save_all=True, append_images=images[1:], resolution=100.0)
+    return images[0].save(save_path, "PDF", save_all=True, append_images=images[1:], resolution=100.0)

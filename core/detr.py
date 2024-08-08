@@ -13,18 +13,20 @@ import cv2
 import numpy as np
 from collections import OrderedDict
 
-MODEL_PATH = "D:\Data Science\DocScan-Research\Inference\DETR 11"
+MODEL_PATH = "models/detr"
 CHECKPOINT = "facebook/detr-resnet-50"
-CHECKPOINT_PATH = "D:\Data Science\DocScan-Research\Inference\DETR 11\detr-epoch=99-val_loss=0.90.ckpt"
-IMAGE_FOLDER = r"D:\Data Science\DocScan-Research\ExtractedImages2"
+CHECKPOINT_PATH = "models/detr/detr-epoch=99-val_loss=0.90.ckpt"
 CONFIDENCE_THRESHOLD = 0.5
 IOU_THRESHOLD = 0.5
 id2labels = {0: "bar-scale", 1: "color stamp", 2: "detail label", 3: "north sign"}
 
-def inference(image_folder, CONFIDENCE_THRESHOLD, IOU_THRESHOLD, model, image_processor, device,id2labels):
+def inference(image_folder, CONFIDENCE_THRESHOLD, IOU_THRESHOLD, model, image_processor, device, id2labels, save_path):
     results_dict = {}
     for img in os.listdir(image_folder):
+        if not img.endswith(".png"):
+            continue
         IMAGE_PATH = os.path.join(image_folder, img)
+        print(IMAGE_PATH)
 
         image = load_image(IMAGE_PATH)
         inputs = image_processor(images=image, return_tensors='pt')
@@ -44,20 +46,19 @@ def inference(image_folder, CONFIDENCE_THRESHOLD, IOU_THRESHOLD, model, image_pr
         box_annotator = sv.BoxAnnotator()
         frame = box_annotator.annotate(scene=image, detections=detections)
         image = Image.fromarray(frame)
-        image_path = f"Temp3/results/annotated_{img}"
         all_labels = {0, 1, 2, 3}
         label = all_labels - set(detections.class_id)
-        add_missing_label(image, image_path, label)
-        results_dict[IMAGE_PATH.replace('Temp3/', '')] = results
+        add_missing_label(image, f"{save_path}/annotated_{img}", label)
+        results_dict[IMAGE_PATH] = results
     return results_dict
    
-def load_model(MODEL_PATH, CHECKPOINT):
+def load_model():
     model = DetrForObjectDetection.from_pretrained(MODEL_PATH)
     image_processor = DetrImageProcessor.from_pretrained(CHECKPOINT)
     return model, image_processor
 
-def load_checkpoint(model, checkpoint_path):
-    checkpoint = torch.load(checkpoint_path, map_location='cpu')
+def load_checkpoint(model):
+    checkpoint = torch.load(CHECKPOINT_PATH, map_location='cpu')
     state_dict = checkpoint['state_dict']
     new_state_dict = OrderedDict()
     for k, v in state_dict.items():
@@ -72,12 +73,11 @@ def move_model_to_device(model):
     return model, device
 
 def add_missing_label(image, save_path, labels):
-    if labels:
-        draw = ImageDraw.Draw(image)
-        font = ImageFont.load_default()
-        text = f"Missing labels: {', '.join(map(str, labels))}"
-        position = (10, 10)
-        draw.text(position, text, fill="red", font=font)
+    draw = ImageDraw.Draw(image)
+    font = ImageFont.load_default()
+    # text = f"Missing labels: {', '.join(map(str, labels))}"
+    position = (10, 10)
+    draw.text(position, '', fill="red", font=font)
     os.makedirs(os.path.dirname(save_path), exist_ok=True)
     image.save(save_path)
 

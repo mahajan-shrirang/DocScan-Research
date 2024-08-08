@@ -173,5 +173,7 @@ config.json
 Extracted Images
 Inference
 models/
-Temp 
-Temp3 
+Temp
+Temp3
+ExtractedImages2/
+results/
