@@ -1,13 +1,15 @@
+from core.inference import inference_image
+from utils.merge import merge_images_and_save_pdf
+from utils.preprocess import preprocess_pdf
+from utils.postprocess import get_summary
+
 import streamlit as st
-from ultralytics import YOLO
 from pymupdf import Pixmap
 import io
 from PIL import Image
 import numpy as np
+import cv2
 
-from core.model import inference_image
-from utils.preprocess import preprocess_pdf
-from utils.merge import merge_images_and_save_pdf
 
 st.title("DocScan")
 
@@ -15,7 +17,7 @@ file = st.file_uploader("Upload a file", type=["pdf"])
 
 if file:
     file_obj = file.getvalue()
-    images:list[Pixmap] = preprocess_pdf(file_obj)
+    images: list[Pixmap] = preprocess_pdf(file_obj)
     st.success("Image extracted from PDF file")
     byte_code = images[0].tobytes()
     image1 = Image.open(io.BytesIO(byte_code))
@@ -24,14 +26,19 @@ if file:
     submit = st.button("Detect Objects")
     final_results = []
     if submit:
-        for pixmap in images:
-            byte_code = pixmap.tobytes()
-            image:Image = Image.open(io.BytesIO(byte_code))
-            image = np.array(image)
-            output_image = inference_image(image)
-            final_results.append(output_image)
+        output_images = []
+        results = []
+        for image in images:
+            byte_code = image.tobytes()
+            image: Image = Image.open(io.BytesIO(byte_code))
+            image: cv2.Mat = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
+            output_image, boxes = inference_image(image)
+            output_images.append(output_image)
+            results.append(boxes)
 
-        st.image(final_results[0], caption="Detected Objects", use_column_width=True)
+        results = get_summary(results)
+        results.index += 1
+        st.table(results)
         merge_images_and_save_pdf(final_results, "output.pdf")
         output_file = io.open("output.pdf", "rb")
         st.download_button("Download PDF", output_file, "output.pdf")
