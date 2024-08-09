@@ -2,7 +2,16 @@ import os
 import shutil
 import random
 
-def splitter(image_dir, label_dir, output_dir, split_ratio=0.8, seed=42):
+def splitter(image_dir, label_dir, output_dir, split_ratio=0.8, seed=42)->None:
+    """
+    Split the dataset into train and validation sets.
+    Args:
+        image_dir (str): Path to the image directory.
+        label_dir (str): Path to the label directory.
+        output_dir (str): Path to the output directory.
+        split_ratio (float): Ratio to split the dataset.
+        seed (int): Seed for the random number generator.
+    """
     train_image_dir = os.path.join(output_dir, 'images/train')
     val_image_dir = os.path.join(output_dir, 'images/val')
     train_label_dir = os.path.join(output_dir, 'labels/train')
@@ -15,6 +24,7 @@ def splitter(image_dir, label_dir, output_dir, split_ratio=0.8, seed=42):
     
     images = [f for f in os.listdir(image_dir) if os.path.isfile(os.path.join(image_dir, f))]
 
+    # shuffle the images to avoid any bias
     random.seed(seed)
     random.shuffle(images)
 
