@@ -3,14 +3,22 @@ from core.yolov4.torch_utils import do_detect
 import torch
 import cv2
 import numpy as np
+import json
+
+
+with open(r"config.json") as fp:
+        configs = json.load(fp)
+        yolo_model_path = configs['YOLO_MODEL_PATH']
+        custom_names = configs['CUSTOM_NAMES']
+        yolo_config = configs['YOLO_CONFIG']
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 
 def load_model():
-    model = Darknet('core/yolov4/yolov4-custom.cfg', inference=True)
+    model = Darknet(yolo_config, inference=True)
     print(model.width, model.height)
-    model.load_state_dict(torch.load('core/yolov4/yolov4.pt',
+    model.load_state_dict(torch.load(yolo_model_path,
                                      map_location=device, weights_only=False))
     model.eval()
     return model

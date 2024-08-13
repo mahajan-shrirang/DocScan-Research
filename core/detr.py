@@ -4,11 +4,16 @@ from transformers import DetrForObjectDetection, DetrImageProcessor
 from PIL import Image, ImageDraw, ImageFont
 import torch
 import cv2
+import json
 from collections import OrderedDict
 
-MODEL_PATH = "models/detr"
+
+with open(r"config.json") as fp:
+        configs = json.load(fp)
+        detr_model_path = configs['DETR_MODEL_PATH']
+        detr_checkpoint = configs['DETR_CHECKPOINT_PATH']
+
 CHECKPOINT = "facebook/detr-resnet-50"
-CHECKPOINT_PATH = "models/detr/detr-epoch=99-val_loss=0.90.ckpt"
 CONFIDENCE_THRESHOLD = 0.5
 IOU_THRESHOLD = 0.5
 id2labels = {
@@ -38,19 +43,17 @@ def inference(image, CONFIDENCE_THRESHOLD, IOU_THRESHOLD, model,
     box_annotator = sv.BoxAnnotator()
     frame = box_annotator.annotate(scene=image, detections=detections)
     image = Image.fromarray(frame)
-    # add_missing_label(image, f"{save_path}/annotated_{img}", label)
-    # results_dict[IMAGE_PATH] = results
     return image, results
 
 
 def load_model():
-    model = DetrForObjectDetection.from_pretrained(MODEL_PATH)
+    model = DetrForObjectDetection.from_pretrained(detr_model_path)
     image_processor = DetrImageProcessor.from_pretrained(CHECKPOINT)
     return model, image_processor
 
 
 def load_checkpoint(model):
-    checkpoint = torch.load(CHECKPOINT_PATH, map_location='cpu')
+    checkpoint = torch.load(detr_checkpoint, map_location='cpu')
     state_dict = checkpoint['state_dict']
     new_state_dict = OrderedDict()
     for k, v in state_dict.items():
