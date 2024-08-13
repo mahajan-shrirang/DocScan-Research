@@ -15,6 +15,7 @@ import time
 from zipfile import ZipFile
 
 
+
 st.title("DocScan")
 
 file = st.file_uploader("Upload a file", type=["pdf"])
@@ -50,7 +51,7 @@ if file:
         print(f"Time taken: {end_time - start_time} seconds")
         st.write(f"Time taken: {end_time - start_time} seconds")
         merge_images_and_save_pdf(output_images,
-                                    save_path=f"{output_dir}/output.pdf")
+                                  save_path=f"{output_dir}/output.pdf")
         if len(results[0]) == 0:
             st.error("No objects detected in the PDF file.")
         results = get_summary(results)

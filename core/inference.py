@@ -4,17 +4,19 @@ import torch
 import cv2
 import numpy as np
 import json
+import functools
 
 
 with open(r"config.json") as fp:
-        configs = json.load(fp)
-        yolo_model_path = configs['YOLO_MODEL_PATH']
-        custom_names = configs['CUSTOM_NAMES']
-        yolo_config = configs['YOLO_CONFIG']
+    configs = json.load(fp)
+    yolo_model_path = configs['YOLO_MODEL_PATH']
+    custom_names = configs['CUSTOM_NAMES']
+    yolo_config = configs['YOLO_CONFIG']
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 
+@functools.lru_cache(maxsize=1)
 def load_model():
     model = Darknet(yolo_config, inference=True)
     print(model.width, model.height)

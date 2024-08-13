@@ -6,12 +6,13 @@ import torch
 import cv2
 import json
 from collections import OrderedDict
+import functools
 
 
 with open(r"config.json") as fp:
-        configs = json.load(fp)
-        detr_model_path = configs['DETR_MODEL_PATH']
-        detr_checkpoint = configs['DETR_CHECKPOINT_PATH']
+    configs = json.load(fp)
+    detr_model_path = configs['DETR_MODEL_PATH']
+    detr_checkpoint = configs['DETR_CHECKPOINT_PATH']
 
 CHECKPOINT = "facebook/detr-resnet-50"
 CONFIDENCE_THRESHOLD = 0.5
@@ -46,6 +47,7 @@ def inference(image, CONFIDENCE_THRESHOLD, IOU_THRESHOLD, model,
     return image, results
 
 
+@functools.lru_cache(maxsize=1)
 def load_model():
     model = DetrForObjectDetection.from_pretrained(detr_model_path)
     image_processor = DetrImageProcessor.from_pretrained(CHECKPOINT)
