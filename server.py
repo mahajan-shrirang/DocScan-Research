@@ -23,6 +23,7 @@ import warnings
 from zipfile import ZipFile
 
 warnings.filterwarnings("ignore")
+os.makedirs("results", exist_ok=True)
 
 app = FastAPI()
 
