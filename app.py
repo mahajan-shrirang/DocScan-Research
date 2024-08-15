@@ -3,23 +3,37 @@ from utils.merge import merge_images_and_save_pdf
 from utils.preprocess import preprocess_pdf
 from utils.postprocess import get_summary
 
+import sqlite3
+import fitz
 import streamlit as st
-from pymupdf import Pixmap
 import io
 import os
 import datetime
 from PIL import Image
 import numpy as np
+import pandas as pd
 import cv2
 import time
 from zipfile import ZipFile
 
-
+st.set_page_config(page_title="DocScan", page_icon="📄", layout="wide")
 
 st.title("DocScan")
 
-file = st.file_uploader("Upload a file", type=["pdf"])
+select_model = st.sidebar.selectbox(
+    "Select model", ("YoLo", "Detr"),
+    index=None,
+    placeholder="Select a model"
+    )
+
+file = st.sidebar.file_uploader("Upload a file", type=["pdf"])
 os.makedirs("results", exist_ok=True)
+
+conn = sqlite3.connect('data.db')
+query = "SELECT id, job_id, status, timestamp FROM processes"
+all_data = pd.read_sql(query, conn)
+st.table(all_data if not all_data.empty else "No data available")
+conn.close()
 
 if file:
     if not file.name.endswith(".pdf"):
@@ -34,7 +48,7 @@ if file:
             f.write(file_obj)
         os.makedirs(f"{directory_name}/output", exist_ok=True)
         output_dir = f"{directory_name}/output"
-        images: list[Pixmap] = preprocess_pdf(file_obj)
+        images: list[fitz.Pixmap] = preprocess_pdf(file_obj)
         if len(images) == 0:
             st.error("No images found in the PDF file.")
         output_images = []
