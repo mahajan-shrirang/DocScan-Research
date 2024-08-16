@@ -87,13 +87,22 @@ def get_process_details(job_id):
     mycursor.close()
     conn_processes.close()
     process = {
-        "job_id": rows[0][1],
-        "process_id": rows[0][2],
         "status": rows[0][3],
         "file_path": rows[0][4],
         "timestamp": rows[0][5],
     }
     return process
+
+
+def get_process_id(job_id):
+    conn_processes = get_db_conn()
+    mycursor = conn_processes.cursor()
+    mycursor.execute("SELECT process_id FROM processes WHERE job_id = ?", (job_id,))
+    rows = mycursor.fetchall()
+    conn_processes.commit()
+    mycursor.close()
+    conn_processes.close()
+    return rows[0][0]
 
 
 def get_processes():
@@ -105,4 +114,5 @@ def get_processes():
     mycursor.close()
     conn_processes.close()
     df = pd.DataFrame(rows[-10:], columns=["ID", "job_id", "process_id", "status", "file_path", "Timestamp"])
+    df = df[["ID", "job_id", "status", "Timestamp"]]
     return df

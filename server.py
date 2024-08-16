@@ -8,6 +8,7 @@ from core.db import (
     get_data_from_db,
     get_db_conn,
     get_processes,
+    get_process_id,
     get_process_details,
 )
 from utils.postprocess import get_summary
@@ -101,6 +102,7 @@ def inference_yolo(directory_name: str, job_id: str):
         log_message(f"Error occurred: {str(e)}", 1)
         return JSONResponse(content={"message": str(e)}, status_code=400)
 
+
 def detr_inference(directory_name: str , job_id: str):
     try:
         update_process_status(job_id, "In Progress")
@@ -157,10 +159,11 @@ def detr_inference(directory_name: str , job_id: str):
             zipf.write(f"{output_dir}/summary.csv", "summary.csv")
         log_message("Returning response with status code 200. Job id: " + job_id, 0)
         update_process_status(job_id, "Completed")
-    
+
     except Exception as e:
         log_message(f"Error occurred: {str(e)}", 1)
         return JSONResponse(content={"message": str(e)}, status_code=400)
+
 
 @app.get("/")
 async def read_root():
@@ -172,7 +175,7 @@ async def read_root():
     return {"Hello": "World"}
 
 
-@app.post("/inference")
+@app.post("/inference/")
 async def inference_yolov4(file: UploadFile = File(...)):
     """Inference using YOLOv4 model
 
@@ -189,7 +192,7 @@ async def inference_yolov4(file: UploadFile = File(...)):
         if file.content_type != "application/pdf":
             log_message("Invalid file type.", 1)
             log_message("Returning response with status code 400.", 0)
-            return JSONResponse(content={"message": "Invalid file type.\
+            return JSONResponse(content={"message": f"Invalid file type {file.content_type}.\
                                         Please upload a PDF file."},
                                 status_code=400)
         file_obj = file.file.read()
@@ -215,7 +218,7 @@ async def inference_yolov4(file: UploadFile = File(...)):
         return JSONResponse(content={"message": str(e)}, status_code=400)
 
 
-@app.post("/inference-detr")
+@app.post("/inference-detr/")
 async def inference_detr(file: UploadFile = File(...)):
     """Inference using DETR model
 
@@ -235,8 +238,7 @@ async def inference_detr(file: UploadFile = File(...)):
             return JSONResponse(content={"message": "Invalid file type. Please \
                                         upload a PDF file."}, status_code=400)
         file_obj = file.file.read()
-        directory_name = f"{str(file.filename).split('.')[0]}-\
-            {datetime.datetime.now()}".replace(" ", "_").replace(":", "-")\
+        directory_name = f"{str(file.filename).split('.')[0]}-{datetime.datetime.now()}".replace(" ", "_").replace(":", "-")\
             .replace(".", "-")
         directory_name = "results/" + directory_name
         os.makedirs(directory_name, exist_ok=True)
@@ -251,11 +253,12 @@ async def inference_detr(file: UploadFile = File(...)):
         update_process_id(job_id, process_id)
         return JSONResponse(content={"message": "Processing started.",
                                     "job_id": job_id}, status_code=200)
-    except Exception as e:  
+    except Exception as e:
         log_message(f"Error occurred: {str(e)}", 1)
         return JSONResponse(content={"message": str(e)}, status_code=400)
 
-@app.get("/status/{job_id}")
+
+@app.get("/status/{job_id}/")
 async def get_status(job_id: str):
     """Get the status of a job
 
@@ -272,7 +275,7 @@ async def get_status(job_id: str):
     return JSONResponse(content=status, status_code=200)
 
 
-@app.get("/kill/{job_id}")
+@app.get("/kill/{job_id}/")
 async def kill_job(job_id: str):
     """Kill a job
 
@@ -284,8 +287,7 @@ async def kill_job(job_id: str):
     """
     log_message(f"Received a request to kill job with ID: {job_id}", 0)
     try:
-        status = get_process_details(job_id)
-        process_id = status["process_id"]
+        process_id = get_process_id(job_id)
         os.kill(int(process_id), 9)
         update_process_status(job_id, "Killed")
         log_message("Job killed successfully.", 0)
@@ -297,7 +299,7 @@ async def kill_job(job_id: str):
         return JSONResponse(content={"message": str(e)}, status_code=400)
 
 
-@app.get("/get-output/{job_id}")
+@app.get("/get-output/{job_id}/")
 async def get_output(job_id: str):
     """Get the output of a job
 
@@ -322,6 +324,13 @@ async def get_output(job_id: str):
         log_message("Returning response with status code 400.", 0)
         return JSONResponse(content={"message": "Job not completed yet."},
                             status_code=400)
+
+
+@app.get("/jobs/")
+async def jobs():
+    processes = get_processes()
+    processes = processes.to_dict(orient='records')
+    return JSONResponse(content={"processes": processes}, status_code=200)
 
 
 if __name__ == "__main__":
