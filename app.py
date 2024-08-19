@@ -4,13 +4,13 @@ import streamlit as st
 import io
 import fitz
 from PIL import Image
+from utils.preprocess import preprocess_pdf
 
 st.set_page_config(page_title="DocScan", page_icon="📄", layout="wide")
 
 BASEURL = "http://localhost:8000"
 
-
-@st.dialog("Are you sure?")
+@st.experimental_dialog("Are you sure?")
 def are_you_sure(selected_job):
     st.header("Are you sure you want to kill job: " + str(selected_job))
     try:
@@ -68,16 +68,14 @@ def download_file(job_id):
         return response.content
     else:
         raise FileNotFoundError(response.text)
-
-
+    
 def display_pdf_preview(file):
     images = fitz.open(stream=file.read(), filetype="pdf")
     page = images.load_page(1)
     image = page.get_pixmap()
     img = Image.open(io.BytesIO(image.tobytes("png")))
-    return img
-
-
+    st.image(img, caption=f"Page 1", use_column_width=False , width=500)
+    
 st.title("DocScan")
 
 select_model = st.sidebar.selectbox(
@@ -95,13 +93,14 @@ if file:
     st.image(st.session_state['image'], caption="Page 1", width=500, use_column_width=False)
     st.session_state['imageDisplayed'] = True
     if st.sidebar.button("Process"):
-        model = "YOLOv4" if select_model == "YOLOv4" else "DETR"
+        display_pdf_preview(file)
+        model = "YOLOv4" if select_model == "YoLo" else "DETR"
         try:
             response = upload_file(file, model)
             st.write(response)
         except ValueError as e:
             st.toast(e)
-
+            
 tab = st.tabs(["Get Processes"])[0]
 
 if tab:
@@ -110,6 +109,7 @@ if tab:
         st.subheader("Preview")
         st.image(st.session_state['image'], caption="Page 1", width=500)
     refresh = st.button("🔄️")
+    display_pdf_preview(file)
     if refresh:
         jobs = get_processes()
         if jobs.shape[0] > 0:
