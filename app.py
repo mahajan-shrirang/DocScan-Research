@@ -4,7 +4,7 @@ import streamlit as st
 import io
 import fitz
 from PIL import Image
-from utils.preprocess import preprocess_pdf
+# from utils.preprocess import preprocess_pdf
 
 st.set_page_config(page_title="DocScan", page_icon="📄", layout="wide")
 
@@ -20,8 +20,7 @@ def are_you_sure(selected_job):
     except ValueError as e:
         st.error(e)
 
-
-@st.dialog("Download File")
+@st.experimental_dialog("Download File")
 def download_file_dialog(job_id):
     if st.session_state.get('file_downloaded', False):
         st.session_state['file_downloaded'] = False
@@ -74,7 +73,8 @@ def display_pdf_preview(file):
     page = images.load_page(1)
     image = page.get_pixmap()
     img = Image.open(io.BytesIO(image.tobytes("png")))
-    st.image(img, caption=f"Page 1", use_column_width=False , width=500)
+    # st.image(img, caption=f"Page 1", use_column_width=False , width=500)
+    return img
     
 st.title("DocScan")
 
@@ -93,8 +93,8 @@ if file:
     st.image(st.session_state['image'], caption="Page 1", width=500, use_column_width=False)
     st.session_state['imageDisplayed'] = True
     if st.sidebar.button("Process"):
-        display_pdf_preview(file)
-        model = "YOLOv4" if select_model == "YoLo" else "DETR"
+        # display_pdf_preview(file)
+        model = "YOLOv4" if select_model == "YOLOv4" else "DETR"
         try:
             response = upload_file(file, model)
             st.write(response)
@@ -109,7 +109,7 @@ if tab:
         st.subheader("Preview")
         st.image(st.session_state['image'], caption="Page 1", width=500)
     refresh = st.button("🔄️")
-    display_pdf_preview(file)
+    # display_pdf_preview(file)
     if refresh:
         jobs = get_processes()
         if jobs.shape[0] > 0:
