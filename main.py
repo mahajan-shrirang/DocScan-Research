@@ -10,7 +10,7 @@ st.set_page_config(
 
 BASEURL = "http://localhost:8000"
 
-@st.dialog("Are you sure?")
+@st.experimental_dialog("Are you sure?")
 def are_you_sure(job_id):
     st.header("Are you sure you want to kill job: " + str(job_id))
     try:
@@ -107,7 +107,7 @@ with tab[1]:
         jobs = get_processes()
         if jobs.shape[0] > 0:
             jobs['Timestamp'] = pd.to_datetime(jobs["Timestamp"])
-            jobs["file_path"] = jobs['file_path']
+            # jobs["file_path"] = jobs['file_path']
 
     if jobs.shape[0] != 0:
         event = st.dataframe(jobs, on_select='rerun', hide_index=True, selection_mode="single-row")
@@ -122,9 +122,7 @@ with tab[1]:
             st.subheader("Selected Job: "+job_id)
 
             if status not in ["Completed", "Failed", "Killed"]:
-                kill = st.button("❌ Kill Job")
-                if kill:
-                    are_you_sure(job_id)
+                st.button("❌ Kill Job", on_click=are_you_sure, args=(job_id,))
 
             if status == "Completed":
                 try:
